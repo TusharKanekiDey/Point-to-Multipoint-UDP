@@ -43,13 +43,15 @@ def checksum(message,l):
     if (l % 2 != 0):
         message += "0".encode('utf-8')
 
-    w = message[0] + ((message[1]) << 8)
-    s = (w & 0xffff) + (w >> 16)
+    x = message[0] + ((message[1]) << 8)
+    y = (x & 0xffff) + (x >> 16)
 
     for i in range(2, len(msg), 2):
-        w = message[i] + ((message[i + 1]) << 8)
-        s = ((w+s) & 0xffff) + ((w+s) >> 16)
+        x = message[i] + ((message[i + 1]) << 8)
+        y = ((x+y) & 0xffff) + ((x+y) >> 16)
     return ~s & 0xffff
 
 def rdt_send():
     pass
+
+
