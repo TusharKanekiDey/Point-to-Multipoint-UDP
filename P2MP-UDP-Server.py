@@ -10,10 +10,10 @@ file = sys.args[-2]
 port = int(sys.args[-3])
 
 import socket
+#https://wiki.python.org/moin/UdpCommunication
 cl_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-
-
+cl_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+cl_socket.bind('',port)
 
 def checksum(message,l):
     #l is len of message
