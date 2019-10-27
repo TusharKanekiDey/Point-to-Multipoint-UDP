@@ -1,6 +1,7 @@
 import sys
 import threading
 
+
 #Read the information from the CMD
 if(len(sys.args)<4):
     print("Wrong Input")
@@ -27,14 +28,27 @@ import datetime as dt
 start_time = dt.datetime.utcnow()
 
 import socket
+#Sock_Dgram is used for UDP. like sock_stream is for TCP
+#socket.AF_INET is for Internet like last time
 cl_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+
+
 def read_text():
+    # with this , we have chunk of file.
+    offset = 0
+    listo = []
     file = location+'\\'+filename
     f = open(file,'rb')
     text = f.read()
     f.close()
-    return text
+    while offset * MSS < len(text):
+        offset += 1
+        mo = (offset-1) * mss
+        mo1 = (offset) * mss
+        listo.append(data[mo:mo1])
+        return listo
+
 
 def checksum(message,l):
     #l is len of message
@@ -51,7 +65,13 @@ def checksum(message,l):
         y = ((x+y) & 0xffff) + ((x+y) >> 16)
     return ~s & 0xffff
 
+def magicThread(data,ser_add):
+    t1 = threading.Thread(target=runn, args=(data,ser_add,))
+
+def runn(data,ser_add):
+    client_sock.sendto(data, ser_add)
+
+
 def rdt_send():
     pass
-
 
