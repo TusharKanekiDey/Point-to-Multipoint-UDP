@@ -9,6 +9,8 @@ prob = float(sys.args[-1])
 file = sys.args[-2]
 port = int(sys.args[-3])
 
+seqno = 0
+
 import socket
 #https://wiki.python.org/moin/UdpCommunication
 cl_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -29,6 +31,12 @@ def checksum(message,l):
         x = message[i] + ((message[i + 1]) << 8)
         y = ((x+y) & 0xffff) + ((x+y) >> 16)
     return ~s & 0xffff
+
+def sequence_generator():
+    if seqno == int ((2**32)-1):
+        seqno = 0
+    else:
+        seqno+=1
 
 def prob_gen():
     import random as rnd
