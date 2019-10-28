@@ -15,6 +15,7 @@ for i in range(1, len(sys.argv) - 3):
 
 # a 16-bit field that has the value 0101010101010101, indicating that this is a data packet.
 d_packet = '0101010101010101'
+d_packet_last = '1101010101010101'
 
 # where data will be stoted
 import os
@@ -112,18 +113,20 @@ def rdt_send(data_seg, ack_list):
 
 
 segments = read_text(MSS)
-for seg in segments:
+for seg,idx in enumerate(segments):
     ack_list = list(server_list)
     sequence_number = '{:032b}'.format(int(seqno))
     checksum_calculated = checksum(seg, len(seg))
     checksum_sent = '{:16b}'.format(checksum_calculated)
-    data_seg = sequence_number.encode('utf-8') + checksum_sent.encode('utf-8') + d_packet.encode('utf-8') + seg
+    if idx == len(segments)-1:
+        data_seg = sequence_number.encode('utf-8') + checksum_sent.encode('utf-8') + d_packet_last.encode('utf-8') + seg
+    else:
+        data_seg = sequence_number.encode('utf-8') + checksum_sent.encode('utf-8') + d_packet.encode('utf-8') + seg
     ack_recvd = rdt_send(data_seg, ack_list)
 
     if ack_recvd == seqno:
         seqno = seqno + 1
     elif ack_recvd == 2 ** 32 - 1:
         seqno = 0
-
 
 

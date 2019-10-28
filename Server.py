@@ -16,6 +16,7 @@ file = sys.argv[2]
 port = int(sys.argv[1])
 buff_size = 2048
 seqno = 0
+l_flag = -1
 
 import socket
 #https://wiki.python.org/moin/UdpCommunication
@@ -49,36 +50,46 @@ def prob_gen():
     rnd.seed(5)
     return rnd.random()
 
+def l_flag_checker(val):
+    if len(val) == 16:
+        return 0
+    
+    return -1
+    
+
+
 fname = file+'.txt'
 f = open(fname,'w')
-while data:
+
+while l_flag ==- 1:  
+    data_recvd, add = cl_socket.recvfrom(buff_size)
+    #get the sequence number from the data_recd
+    seq_recvd = int(data_recvd[0:32],2)
+    checksum_recvd = int(data_recvd[32:48],2)
+    payload_recvd = data_recvd[64:]
     
-data_recvd, add = cl_socket.recvfrom(buff_size)
-#get the sequence number from the data_recd
-seq_recvd = int(data_recvd[0:32],2)
-checksum_recvd = int(data_recvd[32:48],2)
-payload_recvd = data_recvd[64:]
 
-#calculate checksum in server side of the payload_recvd
-checker = checksum(payload_recvd,len(payload_recvd))
+    #calculate checksum in server side of the payload_recvd
+    checker = checksum(payload_recvd,len(payload_recvd))
 
-#random number
-r_got = prob_gen()
+    #random number
+    r_got = prob_gen()
 
-if r_got <= prob or seq_recvd != seqno:
-    print('Timeout, sequence number = ',seqno)
+    if r_got <= prob or seq_recvd != seqno:
+        print('Timeout, sequence number = ',seqno)
 
-else:
-    if seq_recvd == seqno and checksum_recvd == checker:
-        print('hello')
-        f.write(payload_recvd.decode('utf-8'))
-        send_ack = '{:032b}'.format(int(seqno))
-        data = send_ack.encode('utf-8')+ ACKmagicno.encode('utf-8')
-        sequence_generator()
-        cl_socket.sendto(data,add)
+    else:
+        if seq_recvd == seqno and checksum_recvd == checker:
+            print('hello')
+            l_flag =l_flag_checker(int(data_recvd[48:64],2))
+            f.write(payload_recvd.decode('utf-8'))
+            send_ack = '{:032b}'.format(int(seqno))
+            data = send_ack.encode('utf-8')+ ACKmagicno.encode('utf-8')
+            sequence_generator()
+            cl_socket.sendto(data,add)
 
 
 
 f.close()
 print('Done')
-#cl_socket.close()
+cl_socket.close()
