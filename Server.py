@@ -51,7 +51,8 @@ def prob_gen():
 
 fname = file+'.txt'
 f = open(fname,'w')
-
+while data:
+    
 data_recvd, add = cl_socket.recvfrom(buff_size)
 #get the sequence number from the data_recd
 seq_recvd = int(data_recvd[0:32],2)
@@ -69,11 +70,15 @@ if r_got <= prob or seq_recvd != seqno:
 
 else:
     if seq_recvd == seqno and checksum_recvd == checker:
+        print('hello')
         f.write(payload_recvd.decode('utf-8'))
         send_ack = '{:032b}'.format(int(seqno))
         data = send_ack.encode('utf-8')+ ACKmagicno.encode('utf-8')
+        sequence_generator()
         cl_socket.sendto(data,add)
 
-sequence_generator()
+
+
 f.close()
 print('Done')
+#cl_socket.close()
