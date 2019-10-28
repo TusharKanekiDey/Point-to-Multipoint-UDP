@@ -7,12 +7,13 @@ import random as rnd
 ACKmagicno =  '1010101010101010'
 #Read the information from the CMD
 
-if(len(sys.args)!=3):
-    print("Wrong Input")
+#if(len(sys.argv)!=3):
+    #print("Wrong Input")
+print(len(sys.argv))
 
-prob = float(sys.args[3])
-file = sys.args[2]
-port = int(sys.args[1])
+prob = float(sys.argv[3])
+file = sys.argv[2]
+port = int(sys.argv[1])
 buff_size = 2048
 seqno = 0
 
@@ -20,7 +21,7 @@ import socket
 #https://wiki.python.org/moin/UdpCommunication
 cl_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 cl_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-cl_socket.bind('',port)
+cl_socket.bind(('',port))
 
 def checksum(message,l):
     #l is len of message
@@ -32,19 +33,21 @@ def checksum(message,l):
     x = message[0] + ((message[1]) << 8)
     y = (x & 0xffff) + (x >> 16)
 
-    for i in range(2, len(msg), 2):
+    for i in range(2, len(message), 2):
         x = message[i] + ((message[i + 1]) << 8)
         y = ((x+y) & 0xffff) + ((x+y) >> 16)
-    return ~s & 0xffff
+    return ~y & 0xffff
 
 def sequence_generator():
+    global seqno
     if seqno == int ((2**32)-1):
         seqno = 0
     else:
         seqno+=1
 
 def prob_gen():
-    return rnd.random(seed=5)
+    rnd.seed(5)
+    return rnd.random()
 
 fname = file+'.txt'
 f = open(fname,'w')
@@ -74,9 +77,3 @@ else:
 sequence_generator()
 f.close()
 print('Done')
-
-
-
-
-
-
