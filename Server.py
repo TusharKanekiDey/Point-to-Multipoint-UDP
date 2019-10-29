@@ -2,13 +2,12 @@ import sys
 import os
 import random as rnd
 
+# a 16-bit field that has the value 1010101010101010, indicating that this is an ACK packet.
+ACKmagicno = '1010101010101010'
+# Read the information from the CMD
 
-#a 16-bit field that has the value 1010101010101010, indicating that this is an ACK packet.
-ACKmagicno =  '1010101010101010'
-#Read the information from the CMD
-
-#if(len(sys.argv)!=3):
-    #print("Wrong Input")
+# if(len(sys.argv)!=3):
+# print("Wrong Input")
 print(len(sys.argv))
 
 prob = float(sys.argv[3])
@@ -19,13 +18,15 @@ seqno = 0
 l_flag = -1
 
 import socket
-#https://wiki.python.org/moin/UdpCommunication
+
+# https://wiki.python.org/moin/UdpCommunication
 cl_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 cl_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-cl_socket.bind(('',port))
+cl_socket.bind(('', port))
 
-def checksum(message,l):
-    #l is len of message
+
+def checksum(message, l):
+    # l is len of message
 
     # if l is not even , padding an additional zero
     if (l % 2 != 0):
@@ -36,59 +37,71 @@ def checksum(message,l):
 
     for i in range(2, len(message), 2):
         x = message[i] + ((message[i + 1]) << 8)
-        y = ((x+y) & 0xffff) + ((x+y) >> 16)
+        y = ((x + y) & 0xffff) + ((x + y) >> 16)
     return ~y & 0xffff
+
 
 def sequence_generator():
     global seqno
-    if seqno == int ((2**32)-1):
+    if seqno == int((2 ** 32) - 1):
         seqno = 0
     else:
-        seqno+=1
+        seqno += 1
+
 
 def prob_gen():
-    rnd.seed(5)
-    return rnd.random()
+    #rnd.seed(5)
+    by = rnd.random()
+    #print(by)
+    return by
+
 
 def l_flag_checker(val):
-    if len(val) == 16:
+    a = str(val)
+    #print(val)
+    #print(str(val))
+    #print(a[2])
+    #print(a[3])
+
+    if int(a[2]) == 1 and int(a[3])==1:
+        #print("dsfds")
         return 0
-    
+
     return -1
-    
 
 
-fname = file+'.txt'
-f = open(fname,'w')
+fname = file + '.txt'
+f = open(fname, 'w')
 
-while l_flag ==- 1:  
+print(l_flag)
+
+while l_flag == -1:
+    #print("entered the loop")
     data_recvd, add = cl_socket.recvfrom(buff_size)
-    #get the sequence number from the data_recd
-    seq_recvd = int(data_recvd[0:32],2)
-    checksum_recvd = int(data_recvd[32:48],2)
+    # get the sequence number from the data_recd
+    seq_recvd = int(data_recvd[0:32], 2)
+    checksum_recvd = int(data_recvd[32:48], 2)
     payload_recvd = data_recvd[64:]
-    
 
-    #calculate checksum in server side of the payload_recvd
-    checker = checksum(payload_recvd,len(payload_recvd))
+    # calculate checksum in server side of the payload_recvd
+    checker = checksum(payload_recvd, len(payload_recvd))
 
-    #random number
+    # random number
     r_got = prob_gen()
 
     if r_got <= prob or seq_recvd != seqno:
-        print('Timeout, sequence number = ',seqno)
+        print('Timeout, sequence number = ', seqno)
 
     else:
         if seq_recvd == seqno and checksum_recvd == checker:
-            print('hello')
-            l_flag =l_flag_checker(int(data_recvd[48:64],2))
+            #print('hello')
+            l_flag = l_flag_checker(data_recvd[48:64])
+            #print(int(data_recvd[48:64], 2))
             f.write(payload_recvd.decode('utf-8'))
             send_ack = '{:032b}'.format(int(seqno))
-            data = send_ack.encode('utf-8')+ ACKmagicno.encode('utf-8')
+            data = send_ack.encode('utf-8') + ACKmagicno.encode('utf-8')
             sequence_generator()
-            cl_socket.sendto(data,add)
-
-
+            cl_socket.sendto(data, add)
 
 f.close()
 print('Done')
