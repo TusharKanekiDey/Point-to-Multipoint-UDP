@@ -113,7 +113,7 @@ def rdt_send(data_seg, ack_list):
 
 
 segments = read_text(MSS)
-for seg,idx in enumerate(segments):
+for idx,seg in enumerate(segments):
     ack_list = list(server_list)
     sequence_number = '{:032b}'.format(int(seqno))
     checksum_calculated = checksum(seg, len(seg))
@@ -129,4 +129,6 @@ for seg,idx in enumerate(segments):
     elif ack_recvd == 2 ** 32 - 1:
         seqno = 0
 
-
+end_time=dt.datetime.utcnow()
+t_time = end_time-start_time
+print(t_time)
