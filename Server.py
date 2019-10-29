@@ -8,7 +8,7 @@ ACKmagicno = '1010101010101010'
 
 # if(len(sys.argv)!=3):
 # print("Wrong Input")
-print(len(sys.argv))
+#print(len(sys.argv))
 
 prob = float(sys.argv[3])
 file = sys.argv[2]
@@ -72,8 +72,8 @@ def l_flag_checker(val):
 
 fname = file + '.txt'
 f = open(fname, 'w')
-
-print(l_flag)
+s_checker =10
+#print(l_flag)
 ctr_check =0
 
 while l_flag == -1:
@@ -91,7 +91,7 @@ while l_flag == -1:
     else:
         ctr_check =0
 
-    if ctr_check ==10:
+    if ctr_check ==s_checker:
         seqno = seqno-1
         ctr_check =0
 
