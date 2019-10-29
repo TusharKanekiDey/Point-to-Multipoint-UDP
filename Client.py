@@ -78,10 +78,12 @@ def magicThread(data, ser_add):
 
 
 def runn(data, ser_add):
+    #print('runn is called')
     cl_socket.sendto(data, ser_add)
 
 
 def rdt_send(data_seg, ack_list):
+    #print('hello')
     t_thread = []
 
     for ip in ack_list:
@@ -93,8 +95,10 @@ def rdt_send(data_seg, ack_list):
     ack_no_recvd = -1
 
     while ack_count != finish_list:
+        #print('its me')
         cl_socket.settimeout(0.05)
         try:
+            #print('sam')
             ack, add = cl_socket.recvfrom(MSS)
             ack_no_recvd = int(ack[0:32], 2)
             if ack_no_recvd == seqno:
@@ -103,10 +107,13 @@ def rdt_send(data_seg, ack_list):
                     ack_count = ack_count + 1
 
         except socket.timeout:
+            #print(ack_no_recvd)
             print('Timeout, sequence number = ', seqno)
             for ip in ack_list:
                 ser_add = (ip, portno)
+                #print(ser_add)
                 magicThread(data_seg, ser_add)
+
             continue
 
     return ack_no_recvd
@@ -116,6 +123,7 @@ segments = read_text(MSS)
 for idx,seg in enumerate(segments):
     ack_list = list(server_list)
     sequence_number = '{:032b}'.format(int(seqno))
+    #print(sequence_number)
     checksum_calculated = checksum(seg, len(seg))
     checksum_sent = '{:16b}'.format(checksum_calculated)
     if idx == len(segments)-1:
@@ -123,10 +131,11 @@ for idx,seg in enumerate(segments):
     else:
         data_seg = sequence_number.encode('utf-8') + checksum_sent.encode('utf-8') + d_packet.encode('utf-8') + seg
     ack_recvd = rdt_send(data_seg, ack_list)
+    #print(ack_recvd,seqno)
 
     if ack_recvd == seqno:
         seqno = seqno + 1
-    elif ack_recvd == 2 ** 32 - 1:
+    if ack_recvd == 2 ** 32 - 1:
         seqno = 0
 
 end_time=dt.datetime.utcnow()
