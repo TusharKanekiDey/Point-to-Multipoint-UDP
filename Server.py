@@ -74,6 +74,7 @@ fname = file + '.txt'
 f = open(fname, 'w')
 
 print(l_flag)
+ctr_check =0
 
 while l_flag == -1:
     #print("entered the loop")
@@ -85,6 +86,14 @@ while l_flag == -1:
 
     # calculate checksum in server side of the payload_recvd
     checker = checksum(payload_recvd, len(payload_recvd))
+    if seq_recvd == seqno-1:
+        ctr_check = ctr_check+1
+    else:
+        ctr_check =0
+
+    if ctr_check ==10:
+        seqno = seqno-1
+        ctr_check =0
 
     # random number
     r_got = prob_gen()
